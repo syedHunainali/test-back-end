@@ -1,3 +1,4 @@
+const { promisify } = require('util');
 const User = require('../Models/usermodel');
 const asyncHandler = require('./../Utils/asyncErrorHandler');
 const bcrypt = require('bcrypt');
@@ -15,11 +16,10 @@ exports.signup = asyncHandler( async (req,res,next) => {
     if (!req.body.name || !req.body.email || !req.body.password || !req.body.confirmPassword) {
         return res.status(400).json({
             status: 'fail',
-            message: 'Please provide valid name, email, password, and confirmPassword.'
+            message: 'Please provide name, email, password, and confirmPassword.'
         });
     }
 
-    // 1. Create the new user
     const newUser = await User.create({
         name: req.body.name,
         email: req.body.email,
@@ -27,11 +27,7 @@ exports.signup = asyncHandler( async (req,res,next) => {
         confirmPassword: req.body.confirmPassword
     });
 
-    // 2. Create a token for the new user
     const token = signToken(newUser._id);
-
-    // 3. Send the response
-    // We remove the password from the output
     newUser.password = undefined;
 
     res.status(201).json({
@@ -47,25 +43,46 @@ exports.signup = asyncHandler( async (req,res,next) => {
 exports.login = asyncHandler( async (req,res,next) => {
     const {email, password} = req.body;
 
-    // 1. Check if email and password exist in the request body
     if(!email || !password){
-        // In a real app, you'd use a custom error handling middleware
         return res.status(400).json({status: 'fail', message: 'Please provide email and password'});
     }
 
-    // 2. Check if user exists && password is correct
     const user = await User.findOne({ email }).select('+password');
 
-    // 3. Compare the provided password with the hashed password in the database
     if(!user || !(await bcrypt.compare(password, user.password))){
         return res.status(401).json({status: 'fail', message: 'Incorrect email or password'});
     }
 
-    // 4. If everything is ok, send token to client
     const token = signToken(user._id);
 
     res.status(200).json({
         status: 'success',
         token
     });
+});
+
+// Middleware to protect routes
+exports.protect = asyncHandler(async (req, res, next) => {
+    // 1) Getting token and check if it's there
+    let token;
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (!token) {
+        return res.status(401).json({ status: 'fail', message: 'You are not logged in! Please log in to get access.' });
+    }
+
+    // 2) Verification token
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+    // 3) Check if user still exists
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+        return res.status(401).json({ status: 'fail', message: 'The user belonging to this token does no longer exist.' });
+    }
+
+    // GRANT ACCESS TO PROTECTED ROUTE
+    req.user = currentUser;
+    next();
 });
