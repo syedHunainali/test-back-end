@@ -12,4 +12,8 @@ router
     .get(teamController.getMyTeams)
     .post(teamController.createTeam);
 
+router
+    .route('/:teamId/members')
+    .post(teamController.addTeamMember);
+
 module.exports = router;
