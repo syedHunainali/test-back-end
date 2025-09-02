@@ -6,8 +6,12 @@ const authRouter = require('./Routers/authRouter');
 const teamRouter = require('./Routers/teamRouter'); // Import the new team router
 
 let app = express()
-
+// making the frontend static so it will be accessable on the path 
 app.use(express.static(path.join(__dirname, '../frontend')));
+
+app.get('/', (req, res) => {
+    res.redirect('/login.html');
+});
 
 app.use(express.json());
 if (process.env.NODE_ENV === 'development') {

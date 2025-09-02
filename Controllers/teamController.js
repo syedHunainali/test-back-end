@@ -1,4 +1,5 @@
 const Team = require('../Models/teamModel');
+const User = require('../Models/usermodel');
 const asyncHandler = require('../Utils/asyncErrorHandler');
 
 // This controller handles creating a team
@@ -38,7 +39,6 @@ exports.getMyTeams = asyncHandler(async (req, res, next) => {
 exports.addTeamMember = asyncHandler(async (req, res, next) => {
     const { teamId } = req.params;
     const { email } = req.body;
-    const User = require('../Models/usermodel');
 
     const team = await Team.findById(teamId);
 

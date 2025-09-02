@@ -4,7 +4,7 @@ const asyncHandler = require('./../Utils/asyncErrorHandler');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// Function to sign and create a token
+// Function for sign and create a token
 const signToken = id => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN
@@ -85,4 +85,17 @@ exports.protect = asyncHandler(async (req, res, next) => {
     // GRANT ACCESS TO PROTECTED ROUTE
     req.user = currentUser;
     next();
+});
+
+// get user data
+exports.getAllUsers = asyncHandler(async (req, res, next) => {
+    const users = await User.find().select('name email'); 
+
+    res.status(200).json({
+        status: 'success',
+        results: users.length,
+        data: {
+            users
+        }
+    });
 });

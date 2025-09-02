@@ -1,0 +1,23 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/syedHunainali/test-back-end.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/syedHunainali/test-back-end/issues"
+  },
+  "homepage": "https://github.com/syedHunainali/test-back-end#readme",
+  "description": "",
+  "dependencies": {
+    "mongodb": "^6.19.0"
+  }
+}
